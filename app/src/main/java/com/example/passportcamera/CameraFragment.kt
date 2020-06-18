@@ -16,11 +16,9 @@ package com.example.passportcamera
  */
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.hardware.display.DisplayManager
@@ -30,7 +28,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,21 +48,10 @@ import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.navigation.Navigation
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.example.passportcamera.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
@@ -80,6 +66,7 @@ import kotlin.math.min
 
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
+
 val EXTENSION_WHITELIST = arrayOf("JPG")
 
 
@@ -154,12 +141,18 @@ class CameraFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View? =
+        savedInstanceState: Bundle?
+    ): View? =
         inflater.inflate(R.layout.camera_fragment, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        container.postDelayed({(activity as MainActivity).container.systemUiVisibility = FLAGS_FULLSCREEN}, 500L)
+//        container.postDelayed(
+//            {
+//                if (activity != null)
+//                    (activity as CameraActivity).container.systemUiVisibility = FLAGS_FULLSCREEN
+//            }, 500L
+//        )
     }
 
 
@@ -181,19 +174,25 @@ class CameraFragment : Fragment() {
         displayManager.registerDisplayListener(displayListener, null)
 
         // Determine the output directory
-        outputDirectory = MainActivity.getOutputDirectory(requireContext())
+        outputDirectory = CameraActivity.getOutputDirectory(requireContext())
 
         // Wait for the views to be properly laid out
-        viewFinder.post {
+        try {
+            viewFinder.post {
+                if (viewFinder != null && viewFinder.display != null) {
 
-            // Keep track of the display in which this view is attached
-            displayId = viewFinder.display.displayId
+                    // Keep track of the display in which this view is attached
+                    displayId = viewFinder.display.displayId
 
-            // Build UI controls
-            updateCameraUi()
+                    // Build UI controls
+                    updateCameraUi()
 
-            // Set up the camera and its use cases
-            setUpCamera()
+                    // Set up the camera and its use cases
+                    setUpCamera()
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            Log.e("ViewFinder Exception", e.message)
         }
     }
 
@@ -224,9 +223,15 @@ class CameraFragment : Fragment() {
             cameraProvider = cameraProviderFuture.get()
 
             // Select lensFacing depending on the available cameras
+//            if (photoLoader.getCameraState() == PhotoLoader.CameraState.REAR_CAMERA)
+//                lensFacing = CameraSelector.LENS_FACING_BACK
+//            else lensFacing = CameraSelector.LENS_FACING_FRONT
+
             lensFacing = when {
-                hasBackCamera() -> CameraSelector.LENS_FACING_BACK
-                hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT
+                hasBackCamera() && photoLoader.getCameraState()
+                        == PhotoLoader.CameraState.REAR_CAMERA -> CameraSelector.LENS_FACING_BACK
+                hasFrontCamera() && photoLoader.getCameraState()
+                        == PhotoLoader.CameraState.FRONT_CAMERA -> CameraSelector.LENS_FACING_FRONT
                 else -> throw IllegalStateException("Back and front camera are unavailable")
             }
 
@@ -301,7 +306,8 @@ class CameraFragment : Fragment() {
             // A variable number of use-cases can be passed here -
             // camera provides access to CameraControl & CameraInfo
             camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageCapture, imageAnalyzer)
+                this, cameraSelector, preview, imageCapture, imageAnalyzer
+            )
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
@@ -394,12 +400,17 @@ class CameraFragment : Fragment() {
                                 Log.d(TAG, "Image capture scanned into media store: $uri")
                             }
 
+                            // Load the photo Uri into the SharedViewModel
                             photoLoader.setPhoto(savedUri)
 
-                            this@CameraFragment.findNavController().navigate(
-                                CameraFragmentDirections
-                                    .actionCameraToPreview())
-                    }
+                            // Navigate to the PreviewFragment in order to display the photo
+                            activity?.runOnUiThread {
+                                this@CameraFragment.findNavController().navigate(
+                                    CameraFragmentDirections
+                                        .actionCameraToPreview()
+                                )
+                            }
+                        }
                     })
 
                 // We can only change the foreground Drawable using API level 23+ API
@@ -409,7 +420,8 @@ class CameraFragment : Fragment() {
                     container.postDelayed({
                         container.foreground = ColorDrawable(Color.WHITE)
                         container.postDelayed(
-                            { container.foreground = null }, ANIMATION_FAST_MILLIS)
+                            { container.foreground = null }, ANIMATION_FAST_MILLIS
+                        )
                     }, ANIMATION_SLOW_MILLIS)
                 }
             }
@@ -423,10 +435,12 @@ class CameraFragment : Fragment() {
 
             // Listener for button used to switch cameras. Only called if the button is enabled
             it.setOnClickListener {
-                lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
-                    CameraSelector.LENS_FACING_BACK
+                if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
+                    lensFacing = CameraSelector.LENS_FACING_BACK
+                    photoLoader.setCameraState(PhotoLoader.CameraState.REAR_CAMERA)
                 } else {
-                    CameraSelector.LENS_FACING_FRONT
+                    lensFacing = CameraSelector.LENS_FACING_FRONT
+                    photoLoader.setCameraState(PhotoLoader.CameraState.FRONT_CAMERA)
                 }
                 // Re-bind use cases to update selected camera
                 bindCameraUseCases()
@@ -552,7 +566,9 @@ class CameraFragment : Fragment() {
 
         /** Helper function used to create a timestamped file */
         private fun createFile(baseFolder: File, format: String, extension: String) =
-            File(baseFolder, SimpleDateFormat(format, Locale.US)
-                .format(System.currentTimeMillis()) + extension)
+            File(
+                baseFolder, SimpleDateFormat(format, Locale.US)
+                    .format(System.currentTimeMillis()) + extension
+            )
     }
 }

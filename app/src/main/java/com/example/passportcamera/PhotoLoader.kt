@@ -10,7 +10,24 @@ import androidx.lifecycle.ViewModel
  */
 class PhotoLoader : ViewModel() {
 
+    enum class CameraState {
+        FRONT_CAMERA,
+        REAR_CAMERA
+    }
+
+    private var cameraState: CameraState = CameraState.REAR_CAMERA
+
+    fun getCameraState(): CameraState {
+        return cameraState
+    }
+
+    fun setCameraState(state: CameraState) {
+        cameraState = state
+    }
+
+
     private val photoUri = MutableLiveData<Uri>()
+
 
     fun getPhoto(): MutableLiveData<Uri> {
         return photoUri
