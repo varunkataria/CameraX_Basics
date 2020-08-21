@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_piece_add"
+        android:layout_width="350dp"
+        android:layout_height="300dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_padding"
+        app:cardCornerRadius="4dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_piece_add"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/home_padding"
+            android:layout_marginEnd="@dimen/home_padding">
+
+            <TextView
+                android:id="@+id/tv_piece_add_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/editText_piece_add"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="@string/choose_image"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                app:layout_constraintTop_toBottomOf="@id/tv_piece_add_title" />
+
+            <Button
+                android:id="@+id/btn_choose_image_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/choose_image"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editText_piece_add"/>
+
+            <ImageView
+                android:id="@+id/iv_chosen_thumbnail"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintStart_toEndOf="@id/btn_choose_image_add"
+                app:layout_constraintTop_toBottomOf="@id/editText_piece_add">
+
+            </ImageView>
+
+            <Button
+                android:id="@+id/btn_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_choose_image_add"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_close_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cv_piece_add"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="end|bottom"
+        android:contentDescription="@string/submit"
+        android:src="@drawable/ic_action_close" />
+</RelativeLayout>
+
+
+
+
+

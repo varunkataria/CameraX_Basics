@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/activity_padding"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_media_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/home_padding"
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_large"
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btn_piece_add_two"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/home_padding"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/add_card_content_description"
+        android:src="@drawable/ic_shutter_pressed"
+        app:layout_constraintEnd_toStartOf="@+id/btn_piece_add"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageButton
+        android:id="@+id/btn_piece_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/home_padding"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/add_card_content_description"
+        android:src="@drawable/ic_action_add"
+        app:layout_constraintEnd_toStartOf="@+id/btn_category_close"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageButton
+        android:id="@+id/btn_category_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/home_padding"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/close_category_content_description"
+        android:src="@drawable/ic_action_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_media_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tv_media_category" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
