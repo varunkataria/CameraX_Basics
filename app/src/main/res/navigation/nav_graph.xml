@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     app:startDestination="@id/home_fragment">
@@ -8,53 +7,66 @@
     <activity
         android:id="@+id/camera_activity"
         android:name="com.example.passportcamera.CameraActivity"
-        android:label="CameraActivity" >
-    </activity>
+        android:label="Camera Activity" />
 
     <fragment
         android:id="@+id/home_fragment"
         android:name="com.example.passportcamera.HomeFragment"
-        android:label="HomeFragment" >
+        android:label="Home Fragment">
+
+        <action
+            android:id="@+id/action_home_to_preview"
+            app:destination="@id/preview_fragment" />
+
+        <action
+            android:id="@+id/action_add"
+            app:destination="@id/add_fragment" />
+
     </fragment>
 
-    <navigation android:id="@+id/cameraNavigation"
-        app:startDestination="@id/permissions_fragment">
+    <fragment
+        android:id="@+id/add_fragment"
+        android:name="com.example.passportcamera.AddFragment"
+        android:label="Add Fragment">
 
-        <fragment
-                android:id="@+id/permissions_fragment"
-                android:name="com.example.passportcamera.PermissionsFragment"
-                android:label="PermissionsFragment">
+        <argument
+            android:name="category_type"
+            app:argType="string" />
+    </fragment>
 
-                <action
-                    android:id="@+id/action_permissions_to_camera"
-                    app:destination="@id/camera_fragment"
-                    app:popUpTo="@id/permissions_fragment"
-                    app:popUpToInclusive="true" />
+    <fragment
+        android:id="@+id/permissions_fragment"
+        android:name="com.example.passportcamera.PermissionsFragment"
+        android:label="Permissions Fragment">
 
-            </fragment>
-        <fragment
-            android:id="@+id/camera_fragment"
-            android:name="com.example.passportcamera.CameraFragment"
-            android:label="CameraFragment">
+        <action
+            android:id="@+id/action_permissions_to_camera"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/permissions_fragment"
+            app:popUpToInclusive="true" />
 
-            <action
-                android:id="@+id/action_camera_to_preview"
-                app:destination="@id/preview_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/camera_fragment"
+        android:name="com.example.passportcamera.CameraFragment"
+        android:label="Camera Fragment">
 
-            <action
-                android:id="@+id/action_camera_to_permissions"
-                app:destination="@id/permissions_fragment"
-                app:popUpTo="@id/camera_fragment"
-                app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_camera_to_preview"
+            app:destination="@id/preview_fragment" />
 
-        </fragment>
+        <action
+            android:id="@+id/action_camera_to_permissions"
+            app:destination="@id/permissions_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
 
-        <fragment
-            android:id="@+id/preview_fragment"
-            android:name="com.example.passportcamera.PreviewFragment"
-            android:label="GalleryFragment" />
+    </fragment>
 
-    </navigation>
+    <fragment
+        android:id="@+id/preview_fragment"
+        android:name="com.example.passportcamera.PreviewFragment"
+        android:label="Preview Fragment" />
 
 
 </navigation>

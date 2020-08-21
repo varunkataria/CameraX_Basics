@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/cameraNavigation"
-        android:icon="@drawable/ic_photo"
-        android:title="Camera" />
+        android:id="@+id/permissions_fragment"
+        android:icon="@drawable/ic_camera"
+        android:title="@string/menu_camera" />
 
 </menu>

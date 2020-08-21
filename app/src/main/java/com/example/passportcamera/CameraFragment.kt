@@ -18,7 +18,7 @@ package com.example.passportcamera
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.hardware.display.DisplayManager
@@ -33,16 +33,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraInfoUnavailableException
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCapture
+import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.Metadata
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -55,8 +47,7 @@ import androidx.navigation.fragment.findNavController
 import java.io.File
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
-import java.util.ArrayDeque
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
@@ -66,8 +57,6 @@ import kotlin.math.min
 
 /** Helper type alias used for analysis use case callbacks */
 typealias LumaListener = (luma: Double) -> Unit
-
-val EXTENSION_WHITELIST = arrayOf("JPG")
 
 
 /**
@@ -109,6 +98,7 @@ class CameraFragment : Fragment() {
         override fun onDisplayRemoved(displayId: Int) = Unit
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
             if (displayId == this@CameraFragment.displayId) {
+                println("ROTATION CHECK)")
                 Log.d(TAG, "Rotation changed: ${view.display.rotation}")
                 imageCapture?.targetRotation = view.display.rotation
                 imageAnalyzer?.targetRotation = view.display.rotation
@@ -145,22 +135,14 @@ class CameraFragment : Fragment() {
     ): View? =
         inflater.inflate(R.layout.camera_fragment, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-//        container.postDelayed(
-//            {
-//                if (activity != null)
-//                    (activity as CameraActivity).container.systemUiVisibility = FLAGS_FULLSCREEN
-//            }, 500L
-//        )
-    }
-
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         container = view as ConstraintLayout
         viewFinder = container.findViewById(R.id.view_finder)
+        (requireActivity() as CameraActivity).supportActionBar?.hide()
+
 
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -168,7 +150,7 @@ class CameraFragment : Fragment() {
         broadcastManager = LocalBroadcastManager.getInstance(view.context)
 
         // Set up the intent filter that will receive events from our main activity
-        val filter = IntentFilter().apply { addAction(KEY_EVENT_ACTION) }
+//        val filter = IntentFilter().apply { addAction(KEY_EVENT_ACTION) }
 
         // Every time the orientation of device changes, update rotation for use cases
         displayManager.registerDisplayListener(displayListener, null)
@@ -179,7 +161,8 @@ class CameraFragment : Fragment() {
         // Wait for the views to be properly laid out
         try {
             viewFinder.post {
-                if (viewFinder != null && viewFinder.display != null) {
+//                if (viewFinder != null && viewFinder.display != null) {
+                if (viewFinder.display != null) {
 
                     // Keep track of the display in which this view is attached
                     displayId = viewFinder.display.displayId
@@ -192,7 +175,7 @@ class CameraFragment : Fragment() {
                 }
             }
         } catch (e: java.lang.Exception) {
-            Log.e("ViewFinder Exception", e.message)
+            Log.e("ViewFinder Exception", e.message!!)
         }
     }
 
@@ -377,7 +360,7 @@ class CameraFragment : Fragment() {
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
                             Log.d(TAG, "Photo capture succeeded: $savedUri")
-                            System.out.println("Camera Fragment: ${Uri.fromFile(photoFile)}")
+                            println("Camera Fragment: ${Uri.fromFile(photoFile)}")
 
                             // Implicit broadcasts will be ignored for devices running API level >= 24
                             // so if you only target API level 24+ you can remove this statement
@@ -482,11 +465,6 @@ class CameraFragment : Fragment() {
         private var lastAnalyzedTimestamp = 0L
         var framesPerSecond: Double = -1.0
             private set
-
-        /**
-         * Used to add listeners that will be called with each luma computed
-         */
-        fun onFrameAnalyzed(listener: LumaListener) = listeners.add(listener)
 
         /**
          * Helper extension function used to extract a byte array from an image plane buffer

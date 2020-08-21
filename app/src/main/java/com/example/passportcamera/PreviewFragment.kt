@@ -1,8 +1,10 @@
 package com.example.passportcamera
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -20,6 +22,10 @@ class PreviewFragment internal constructor() : Fragment() {
     private lateinit var container: RelativeLayout
     private val photoLoader: PhotoLoader by activityViewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         println("On Create View")
@@ -41,12 +47,16 @@ class PreviewFragment internal constructor() : Fragment() {
         Glide.with(photoDisplay).load(photo).into(photoDisplay)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        println("On Activity Created")
-
-        // Remove the screen from fullscreen, immersive mode for ease of use
-        (activity as CameraActivity).container.systemUiVisibility = FLAGS_NORMAL_SCREEN
+    @SuppressLint("RestrictedApi")
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as CameraActivity).supportActionBar?.show()
     }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.findItem(R.id.search).isVisible = false
+        super.onPrepareOptionsMenu(menu)
+    }
+
 
 }
